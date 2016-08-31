@@ -147,7 +147,7 @@
     (urlopen (format "http://www.reddit.com/subreddits/search.json?limit=100&q=%s" (URLEncoder/encode q)) cookie)))
   ([q options cookie]
    (parse-reddits
-    (urlopen (format "http://www.reddit.com/subreddits/search.json?%s" (post-data (conj {:q q} options))) cookie))))
+    (urlopen (format "http://www.reddit.com/subreddits/search.json?q=%s&%s" q (post-data options) cookie)))))
 
 (defn me "Load current user information"
   ([cookie]
