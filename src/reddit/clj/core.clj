@@ -1,14 +1,14 @@
 (ns reddit.clj.core
   "High level reddit API wrapper for clojure."
-  (:require [reddit.clj.client :as client])
-)
+  (:require [reddit.clj.client :as client]))
+
 
 (defprotocol RedditChannels
   ^{
       :private true
-      :doc "The reddit web API interfaces for reading data from reddit"
-     }
-  (reddits 
+      :doc "The reddit web API interfaces for reading data from reddit"}
+
+  (reddits
     [this rname] [this rname rcount after]
     "Retrieve reddits from subreddit")
   (reddits-new
@@ -19,8 +19,8 @@
     "Retrieve reddits from subreddit, section *controversial*")
   (reddits-top
     [this rname] [this rname rcount after]
-    "Retrieve reddits from subreddit, section *hot*")    
-  (user 
+    "Retrieve reddits from subreddit, section *hot*")
+  (user
     [this user]
     "Retrieve reddits related by user")
   (user-comments
@@ -41,26 +41,29 @@
   (about
     [this user]
     "Retrieve user information")
-  (comments 
-    [this reddit-id] 
+  (comments
+    [this reddit-id]
     "Retrieve comments for a reddit")
   (modqueue
     [this reddit-id]
     "Retrieve modqueue for a reddit")
-  (domain 
+  (domain
     [this domain-name] [this domain-name rcount after]
     "Retrieve reddits under a domain")
-  (saved 
+  (saved
     [this] [this rcount after]
     "Retrieve saved reddits")
-  (info 
-    [this url] 
+  (info
+    [this url]
     "Retrieve url information from reddit")
-  (me 
-    [this] 
+  (me
+    [this]
     "Retrieve user information according to current credential")
-  (mine 
-    [this] 
+  (search
+    [this q] [this q options]
+    "Search Sub-Reddits")
+  (mine
+    [this]
     "Retrieve subcribed subreddits according to current credential ")
   (message-inbox
     [this]
@@ -68,12 +71,13 @@
   (message-sent
     [this]
     "Retrieve messages from outbox"))
- 
-(defprotocol RedditOperations  
+
+
+(defprotocol RedditOperations
   ^{
       :private true
-      :doc "The reddit web API interfaces for writing data into reddit"
-   }
+      :doc "The reddit web API interfaces for writing data into reddit"}
+
   (vote-up
     [this id]
     "Vote up a comment or post")
@@ -111,59 +115,60 @@
    [this url]
    "Fetch a comment"))
 
+
 (defrecord RedditClient [credential modhash]
   RedditChannels
     (reddits [this rname]
       (client/subreddit rname nil credential nil nil))
-    (reddits [this rname rcount after] 
+    (reddits [this rname rcount after]
       (client/subreddit rname nil credential rcount after))
     (reddits-new [this rname]
       (client/subreddit rname "new" credential nil nil))
-    (reddits-new [this rname rcount after] 
+    (reddits-new [this rname rcount after]
       (client/subreddit rname "new" credential rcount after))
     (reddits-controversial [this rname]
       (client/subreddit rname "controversial" credential nil nil))
-    (reddits-controversial [this rname rcount after] 
+    (reddits-controversial [this rname rcount after]
       (client/subreddit rname "controversial" credential rcount after))
     (reddits-top [this rname]
       (client/subreddit rname "top" credential nil nil))
-    (reddits-top [this rname rcount after] 
+    (reddits-top [this rname rcount after]
       (client/subreddit rname "top" credential rcount after))
-    (user [this user] 
+    (user [this user]
       (client/userreddit user credential nil nil nil))
-    (user-comments [this user] 
+    (user-comments [this user]
       (client/userreddit user credential "comments" nil nil))
-    (user-comments [this user rcount after] 
+    (user-comments [this user rcount after]
       (client/userreddit user credential "comments" rcount after))
-    (user-submitted [this user] 
+    (user-submitted [this user]
       (client/userreddit user credential "submitted" nil nil))
-    (user-submitted [this user rcount after] 
+    (user-submitted [this user rcount after]
       (client/userreddit user credential "submitted" rcount after))
-    (user-liked [this user] 
+    (user-liked [this user]
       (client/userreddit user credential "liked" nil nil))
-    (user-liked [this user rcount after] 
+    (user-liked [this user rcount after]
       (client/userreddit user credential "liked" rcount after))
-    (user-disliked [this user] 
+    (user-disliked [this user]
       (client/userreddit user credential "disliked" nil nil))
-    (user-disliked [this user rcount after] 
+    (user-disliked [this user rcount after]
       (client/userreddit user credential "disliked" rcount after))
-    (user-hidden [this user] 
+    (user-hidden [this user]
       (client/userreddit user credential "hidden" nil nil))
-    (user-hidden [this user rcount after] 
+    (user-hidden [this user rcount after]
       (client/userreddit user credential "hidden" rcount after))
-    (comments [this reddit-id] 
+    (comments [this reddit-id]
       (client/redditcomments reddit-id credential))
     (modqueue [this reddit-id]
       (client/redditmodqueue reddit-id credential))
-    (saved [this] 
+    (saved [this]
       (client/savedreddits credential nil nil))
     (saved [this rcount after]
       (client/savedreddits credential rcount after))
-    (domain [this domain-name] 
+    (domain [this domain-name]
       (client/domainreddits domain-name credential nil nil))
-    (domain [this domain-name rcount after] 
+    (domain [this domain-name rcount after]
       (client/domainreddits domain-name credential rcount after))
-    (info [this url] 
+    (info [this url]
       (client/info url credential))
     (mine [this]
       (client/mine credential))
@@ -172,36 +177,41 @@
     (message-inbox [this]
       (client/messages "inbox" credential))
     (message-sent [this]
-      (client/messages "sent" credential)))
+      (client/messages "sent" credential))
+    (search [this q]
+      (client/search q credential))
+    (search [this q options]
+      (client/search q options credential)))
+
 
 
 (defn login "Login to reddit, return cookie as user credential"
   ([] (RedditClient. nil nil))
   ([user passwd]
-     (if (nil? user)
-       (RedditClient. nil nil)
-       (let [userdata (client/login user passwd)]
-         (if (nil? userdata)
-           (RedditClient. nil nil)
-           (RedditClient. (:cookies userdata) (:modhash userdata)))))))
-  
+   (if (nil? user)
+     (RedditClient. nil nil)
+     (let [userdata (client/login user passwd)]
+       (if (nil? userdata)
+         (RedditClient. nil nil)
+         (RedditClient. (:cookies userdata) (:modhash userdata)))))))
+
 (extend-type RedditClient
   RedditOperations
-    (vote-up [this id] 
+    (vote-up [this id]
       (client/vote id "1" (:modhash this) (:credential this)))
-    (vote-down [this id] 
+    (vote-down [this id]
       (client/vote id "-1" (:modhash this) (:credential this)))
-    (rescind-vote [this id] 
+    (rescind-vote [this id]
       (client/vote id "0" (:modhash this) (:credential this)))
-    (add-comment [this id text] 
+    (add-comment [this id text]
       (client/add-comment id text (:modhash this) (:credential this)))
     (save [this id]
       (client/save id (:modhash this) (:credential this)))
-    (unsave [this id] 
+    (unsave [this id]
       (client/unsave id (:modhash this) (:credential this)))
-    (submit-link [this title url sr] 
+    (submit-link [this title url sr]
       (client/submit "link" title sr url  (:modhash this) (:credential this)))
-    (submit-text [this title text sr] 
+    (submit-text [this title text sr]
       (client/submit "text" title sr text (:modhash this) (:credential this)))
     (hide [this id]
       (client/hide id  (:modhash this) (:credential this)))

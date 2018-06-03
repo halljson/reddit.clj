@@ -36,10 +36,10 @@
 (defn- build-pagination-param
   [rcount since]
   (str
-   "?"
-   (and since (str "after=" since))
-   (and since rcount "&")
-   (and rcount (str "count=" rcount))))
+    "?"
+    (and since (str "after=" since))
+    (and since rcount "&")
+    (and rcount (str "count=" rcount))))
 
 (defn- build-subreddit-url
   [rname qualifier rcount since]
@@ -49,9 +49,11 @@
        ".json"
        (build-pagination-param rcount since)))
 
+
 (defn- build-user-url
   [user qualifier rcount since]
   (str "http://www.reddit.com/user/" user
+
        (and qualifier (str "/" qualifier))
        "/.json"
        (build-pagination-param rcount since)))
@@ -106,43 +108,51 @@
 
 (defn subreddit "Get subreddit items"
   ([rname qualifier cookie rcount since]
-     (parse-reddits
-      (urlopen
-       (build-subreddit-url rname qualifier rcount since) cookie))))
+   (parse-reddits
+    (urlopen
+     (build-subreddit-url rname qualifier rcount since) cookie))))
 
 (defn userreddit "Get user reddits"
   ([user cookie qualifier rcount since]
-     (parse-reddits
-      (urlopen
-       (build-user-url user qualifier rcount since) cookie))))
+   (parse-reddits
+    (urlopen
+     (build-user-url user qualifier rcount since) cookie))))
 
 (defn redditcomments "Get comments for a reddit"
   ([reddit-id cookie]
-     (parse-comments
-      (urlopen
-       (build-comments-url reddit-id) cookie))))
+   (parse-comments
+    (urlopen
+     (build-comments-url reddit-id) cookie))))
 
 (defn domainreddits "Get reddits from specific domain"
   ([domain-name cookie rcount since]
-     (parse-reddits
-      (urlopen
-       (build-domain-reddits-url domain-name rcount since) cookie))))
+   (parse-reddits
+    (urlopen
+     (build-domain-reddits-url domain-name rcount since) cookie))))
 
 (defn info "Find information about a url in reddit"
   ([url cookie]
-     (parse-reddits
-      (urlopen
-       (str "http://www.reddit.com/api/info.json?url=" (URLEncoder/encode url)) cookie))))
+   (parse-reddits
+    (urlopen
+     (str "http://www.reddit.com/api/info.json?url=" (URLEncoder/encode url)) cookie))))
 
 (defn mine "Load user's subscribed subreddits"
   ([cookie]
-     (parse-reddits
-      (urlopen "http://www.reddit.com/reddits/mine.json?limit=100" cookie))))
+   (parse-reddits
+    (urlopen "http://www.reddit.com/reddits/mine.json?limit=100" cookie))))
+
+(defn search "Search Sub-Reddits"
+  ([q cookie]
+   (parse-reddits
+    (urlopen (format "http://www.reddit.com/subreddits/search.json?limit=100&q=%s" (URLEncoder/encode q)) cookie)))
+  ([q options cookie]
+   (parse-reddits
+    (urlopen (format "http://www.reddit.com/subreddits/search.json?%s" (post-data (conj {:q q} options))) cookie))))
 
 (defn me "Load current user information"
   ([cookie]
-     (:data
-      (urlopen "http://www.reddit.com/api/me.json" cookie))))
+   (:data
+    (urlopen "http://www.reddit.com/api/me.json" cookie))))
 
 (defn- post-success? [response]
   (if (nil? response)
