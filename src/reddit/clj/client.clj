@@ -5,10 +5,10 @@
   (:import [java.net URLEncoder]))
 
 (defn- post-data [data]
-  (string/join "&"
-               (map
-                #(str (name (key %))
-                      "=" (URLEncoder/encode (str (val %)) "utf8")) data)))
+  (letfn [(k  [x] (name (key x)))
+          (v  [x] (URLEncoder/encode (str (val x))))
+          (kv [x] (str (k x) "=" (v x) "utf8"))]
+         (string/join "&" (map kv data))))
 
 (defn urlopen [url cookie]
   (let [response (client/get url
@@ -49,11 +49,9 @@
        ".json"
        (build-pagination-param rcount since)))
 
-
 (defn- build-user-url
   [user qualifier rcount since]
   (str "http://www.reddit.com/user/" user
-
        (and qualifier (str "/" qualifier))
        "/.json"
        (build-pagination-param rcount since)))
