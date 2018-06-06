@@ -2,7 +2,6 @@
   "High level reddit API wrapper for clojure."
   (:require [reddit.clj.client :as client]))
 
-
 (defprotocol RedditChannels
   ^{
       :private true
@@ -72,7 +71,6 @@
     [this]
     "Retrieve messages from outbox"))
 
-
 (defprotocol RedditOperations
   ^{
       :private true
@@ -114,7 +112,6 @@
   (get-comment
    [this url]
    "Fetch a comment"))
-
 
 (defrecord RedditClient [credential modhash]
   RedditChannels
@@ -183,8 +180,6 @@
     (search [this q options]
       (client/search q options credential)))
 
-
-
 (defn login "Login to reddit, return cookie as user credential"
   ([] (RedditClient. nil nil))
   ([user passwd]
@@ -218,9 +213,9 @@
     (unhide [this id]
       (client/unhide id  (:modhash this) (:credential this)))
     (remove-post [this id]
-                 (client/removepost id (:modhash this) (:credential this)))
+      (client/removepost id (:modhash this) (:credential this)))
     (get-comment [this url]
-                 (client/get-comment (:credential this) url)))
+      (client/get-comment (:credential this) url)))
 
 (defn thing-type "test thing type with name" [name]
   (if-not (nil? name)

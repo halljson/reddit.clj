@@ -83,10 +83,7 @@
   (map parse-comment-replies (parse-reddits comment-root)))
 
 (defn- parse-comments [resp]
-  (mapv #(-> %
-            :data
-            :children)
-       resp))
+  (mapv :data (:children (:data resp))))
 
 (defn login "Login to reddit" [user passwd]
   (let [resp (urlpost
