@@ -1,4 +1,4 @@
-(defproject org.clojars.jeffersonheard/reddit.clj "0.4.3"
+(defproject reddit.clj "0.4.3"
   :description "A reddit API wrapper for clojure"
   :url "https://github.com/JeffHeard/reddit.clj"
   :author "Sun Ning <classicning@gmail.com>"
